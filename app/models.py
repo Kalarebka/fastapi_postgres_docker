@@ -1,40 +1,35 @@
-from datetime import time, date
-from sqlalchemy import Column, ForeignKey, Integer, String, Table
+from sqlalchemy import Column, ForeignKey, Integer, String, Table, Time, Date
 from sqlalchemy.orm import relationship, Session
 
 from .database import Base, engine
 
 
-UserEvent = Table("UserEvent",
-                Column("id", Integer, primary_key=True),
-                Column("user_id", Integer, ForeignKey("UserAccount.id")),
-                Column("event_id", Integer, ForeignKey("Event.id")))
-                
+user_event = Table(
+    "association",
+    Base.metadata,
+    Column("user_id", ForeignKey("user_account.id"), primary_key=True),
+    Column("event_id", ForeignKey("event.id"), primary_key=True),
+)
+
 
 class UserAccount(Base):
     __tablename__ = "user_account"
 
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True, max_length=128)
-    hashed_password = Column(String, max_length=256)
-    username = Column(String, unique=True, max_length=32)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    email = Column(String(128), unique=True, nullable=False)
+    password = Column(String(256), nullable=False)
+    username = Column(String(32), unique=True, nullable=False)
 
-    events = relationship("Event", secondary=UserEvent, backref="UserAccount")
+    events = relationship("Event", secondary=user_event, back_populates="users")
 
 
 class Event(Base):
     __tablename__ = "event"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, max_length=128, nullable=False)
-    time = Column(time)
-    date = Column(date)
-    place = Column(String, max_length=128)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(128), nullable=False)
+    time = Column(Time)
+    date = Column(Date)
+    place = Column(String(128))
 
-
-    users = relationship("UserAccount", secondary=UserEvent, backref="Event")
-
-
-
-
-Base.metadata.create_all(engine)
+    users = relationship("UserAccount", secondary=user_event, back_populates="events")

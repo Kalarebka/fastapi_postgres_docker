@@ -1,16 +1,16 @@
 from datetime import date, time
-from typing import Union
+from typing import ForwardRef, List, Union
 
 from pydantic import BaseModel
 
-
+# Takes care of the classes referencing each other
+UserAccount = ForwardRef("UserAccount")
 
 class EventBase(BaseModel):
     name: str
-    time: Union[time, None] = None
-    date: Union[date, None] = None
-    place: Union[str, None] = None
-
+    time: Union[time, None]
+    date: Union[date, None]
+    place: Union[str, None]
 
 
 class EventCreate(EventBase):
@@ -19,10 +19,10 @@ class EventCreate(EventBase):
 
 class Event(EventBase):
     id: int
-    
+    users: List[UserAccount] = []
+
     class Config:
         orm_mode = True
-
 
 
 class UserAccountBase(BaseModel):
@@ -36,6 +36,10 @@ class UserAccountCreate(UserAccountBase):
 
 class UserAccount(UserAccountBase):
     id: int
+    events: List[Event] = []
 
     class Config:
         orm_mode = True
+
+# Takes care of the classes referencing each other
+Event.update_forward_refs()

@@ -11,18 +11,21 @@ services:
     ports:
       - 8000:80
     environment:
-      - DATABASE_URL=postgresql://fastapi:password12345@db:5433/fastapi
+      - DATABASE_URL=postgresql://postgres:password12345@db:5432/fastapi
     depends_on:
       - db
   db:
-    image: postgres:13-alpine
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    restart: always
     ports:
-      - "5433"
+      - 5432:5432
     container_name: db
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
-      - POSTGRES_USER=fastapi
+      - POSTGRES_USER=postgres
       - POSTGRES_SERVER=db
       - POSTGRES_PASSWORD=password12345
       - POSTGRES_DB=fastapi
